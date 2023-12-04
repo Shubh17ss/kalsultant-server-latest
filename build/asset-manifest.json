@@ -1,0 +1,32 @@
+{
+  "files": {
+    "main.css": "/static/css/main.3456619d.css",
+    "main.js": "/static/js/main.0e3b3fd6.js",
+    "static/media/alone.webp": "/static/media/alone.3c495a92968cd41d326c.webp",
+    "static/media/relationship.webp": "/static/media/relationship.552aaaa13b7887d427cd.webp",
+    "static/media/kal_home_wallpaper_optimised.webp": "/static/media/kal_home_wallpaper_optimised.907e3729ec513d9a83b6.webp",
+    "static/media/struggle.webp": "/static/media/struggle.cc07fcb7efbdcae00a11.webp",
+    "static/media/birthtimeImage.png": "/static/media/birthtimeImage.abf654bc60ed7514a492.png",
+    "static/media/astrology_chart.webp": "/static/media/astrology_chart.001a20d05d8185b7ebd4.webp",
+    "static/media/knowYourself.webp": "/static/media/knowYourself.4649a72c1e920e3d1459.webp",
+    "static/media/gender.png": "/static/media/gender.135058a40a5211d8c9f5.png",
+    "static/media/notepad.png": "/static/media/notepad.ff74515331c788c17367.png",
+    "static/media/patrika_image.webp": "/static/media/patrika_image.ec947605f9786c7825b0.webp",
+    "static/media/KalSultant_website_transparent_logo.webp": "/static/media/KalSultant_website_transparent_logo.8d20cb726c5716ac44a0.webp",
+    "static/media/slick.svg": "/static/media/slick.2630a3e3eab21c607e21.svg",
+    "static/media/slick.eot": "/static/media/slick.a4e97f5a2a64f0ab1323.eot",
+    "static/media/slick.ttf": "/static/media/slick.c94f7671dcc99dce43e2.ttf",
+    "static/media/slick.woff": "/static/media/slick.295183786cd8a1389865.woff",
+    "static/media/google-calendar.svg": "/static/media/google-calendar.1ed9c55d9ed7f308b64bbd19fb29f7b9.svg",
+    "static/media/globe.svg": "/static/media/globe.010a23a5973223e40b560a7787bb5a2d.svg",
+    "index.html": "/index.html",
+    "static/media/google-meet.svg": "/static/media/google-meet.8225444645c6c2060c8c4e75d861e607.svg",
+    "static/media/kalsultant_icon_small.webp": "/static/media/kalsultant_icon_small.960729f3f1f71f774a1e.webp",
+    "main.3456619d.css.map": "/static/css/main.3456619d.css.map",
+    "main.0e3b3fd6.js.map": "/static/js/main.0e3b3fd6.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.3456619d.css",
+    "static/js/main.0e3b3fd6.js"
+  ]
+}
