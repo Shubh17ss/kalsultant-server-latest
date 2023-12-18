@@ -1,9 +1,9 @@
 {
   "files": {
     "main.css": "/static/css/main.1b946d02.css",
-    "main.js": "/static/js/main.d09c579a.js",
-    "static/css/999.ad5578e0.chunk.css": "/static/css/999.ad5578e0.chunk.css",
-    "static/js/999.b8d12cfa.chunk.js": "/static/js/999.b8d12cfa.chunk.js",
+    "main.js": "/static/js/main.d83bb4ae.js",
+    "static/css/999.cad98274.chunk.css": "/static/css/999.cad98274.chunk.css",
+    "static/js/999.319e5d70.chunk.js": "/static/js/999.319e5d70.chunk.js",
     "static/css/888.382cc86d.chunk.css": "/static/css/888.382cc86d.chunk.css",
     "static/js/888.d8c3f335.chunk.js": "/static/js/888.d8c3f335.chunk.js",
     "static/css/21.c2e6f7f8.chunk.css": "/static/css/21.c2e6f7f8.chunk.css",
@@ -46,10 +46,10 @@
     "static/js/642.4822b681.chunk.js": "/static/js/642.4822b681.chunk.js",
     "static/js/121.15fa4505.chunk.js": "/static/js/121.15fa4505.chunk.js",
     "static/js/296.7f398f87.chunk.js": "/static/js/296.7f398f87.chunk.js",
-    "static/media/alone.webp": "/static/media/alone.4d686d9bc73795be77a3.webp",
-    "static/media/relationship.webp": "/static/media/relationship.324b296c7cf31c28cc84.webp",
-    "static/media/kal_home_wallpaper_optimised.webp": "/static/media/kal_home_wallpaper_optimised.907e3729ec513d9a83b6.webp",
+    "static/media/alone.webp": "/static/media/alone.f15c35efebd33d01c710.webp",
     "static/media/struggle.webp": "/static/media/struggle.2ce731239fd1cffb3fe3.webp",
+    "static/media/relationship.webp": "/static/media/relationship.6b3df1888c779f676c2b.webp",
+    "static/media/kal_home_wallpaper_optimised.webp": "/static/media/kal_home_wallpaper_optimised.747ef00a511cb83e6200.webp",
     "static/media/astrology_chart.webp": "/static/media/astrology_chart.001a20d05d8185b7ebd4.webp",
     "static/media/knowYourself.webp": "/static/media/knowYourself.4649a72c1e920e3d1459.webp",
     "static/media/gender.png": "/static/media/gender.135058a40a5211d8c9f5.png",
@@ -66,9 +66,9 @@
     "static/media/google-meet.svg": "/static/media/google-meet.8225444645c6c2060c8c4e75d861e607.svg",
     "static/media/kalsultant_icon_small.webp": "/static/media/kalsultant_icon_small.960729f3f1f71f774a1e.webp",
     "main.1b946d02.css.map": "/static/css/main.1b946d02.css.map",
-    "main.d09c579a.js.map": "/static/js/main.d09c579a.js.map",
-    "999.ad5578e0.chunk.css.map": "/static/css/999.ad5578e0.chunk.css.map",
-    "999.b8d12cfa.chunk.js.map": "/static/js/999.b8d12cfa.chunk.js.map",
+    "main.d83bb4ae.js.map": "/static/js/main.d83bb4ae.js.map",
+    "999.cad98274.chunk.css.map": "/static/css/999.cad98274.chunk.css.map",
+    "999.319e5d70.chunk.js.map": "/static/js/999.319e5d70.chunk.js.map",
     "888.382cc86d.chunk.css.map": "/static/css/888.382cc86d.chunk.css.map",
     "888.d8c3f335.chunk.js.map": "/static/js/888.d8c3f335.chunk.js.map",
     "21.c2e6f7f8.chunk.css.map": "/static/css/21.c2e6f7f8.chunk.css.map",
@@ -113,6 +113,6 @@
   },
   "entrypoints": [
     "static/css/main.1b946d02.css",
-    "static/js/main.d09c579a.js"
+    "static/js/main.d83bb4ae.js"
   ]
 }
