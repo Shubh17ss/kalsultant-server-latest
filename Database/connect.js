@@ -1,10 +1,8 @@
-// const Pool=require('pg').Pool;
-
 const {Client} =require('pg');
 
 
 const pool=new Client({
-    connectionString: 'postgres://skwqjesusstowr:81973c569ca3c31b782dd2a1fdcc8a8a2b2d13ec2e78fdd6a0d6da7b3f7fdbca@ec2-44-214-132-149.compute-1.amazonaws.com:5432/d921f2bqtvp1jk',
+    connectionString:`postgres://pqlardcvmbatih:de68ede205b67cfd1b1e63e8552bb4a3182722b674962c4b45bb1521ee8ac96e@ec2-35-169-11-108.compute-1.amazonaws.com:5432/d2snae5i64dusi`,
     ssl: {
       rejectUnauthorized: false
     }
