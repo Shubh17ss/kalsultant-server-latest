@@ -9,6 +9,7 @@ const sessionRoutes = require('./Routes/session');
 const slotsRoutes = require('./Routes/slots');
 const adminRoutes = require('./Routes/admin');
 const whatsApproutes=require('./Routes/whatsApproutes');
+const paymentRoutes=require('./Routes/payment');
 
 //for environment variables
 const dotenv = require('dotenv');
@@ -22,7 +23,9 @@ app.use('/api/user', userRoutes);
 app.use('/api/session', sessionRoutes);
 app.use('/api/slots', slotsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/payment',paymentRoutes);
 app.use('/api/whatsApp',whatsApproutes);
+
 
 
 //code to render the react build folder
