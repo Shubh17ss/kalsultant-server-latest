@@ -7,7 +7,6 @@ const calendar = google.calendar('v3');
 
 const createSession = (req, res) => {
     const data = req.body;
-    console.log(data.id);
     const sessionId = randomUUID();
     pool.query('SELECT CURRENT_DATE', (error, results) => {
         if (error) {
@@ -47,7 +46,6 @@ const createSession = (req, res) => {
 const createMeetingInvite = (req, res) => {
 
     let { email, name, date, start_time, end_time } = req.body;
-    console.log(date);
     date = date.trim();
 
 
@@ -170,15 +168,13 @@ const getBookedSLots = (req, res) => {
 
 const getUserSessions = (req, res) => {
     const userId=req.query.user_id;
-    console.log('Code came here');
+  
     pool.query('SELECT * FROM SESSIONS where user_id=$1 ORDER BY CREATED_AT DESC',[userId],(error,results)=>{
         if(error){
-            console.log(error.message);
             res.status(400).send(error.message);
         }
         else{
-            console.log(results.rows);
-            res.status(200).send(results.rows);
+           res.status(200).send(results.rows);
         }
     })
 }
