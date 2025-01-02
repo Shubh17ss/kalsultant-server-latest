@@ -3,6 +3,7 @@ const pool = require('../Database/connect');
 const { randomUUID } = require('crypto');
 const { google } = require('googleapis');
 const { userInfo } = require('os');
+const { oauth2 } = require('googleapis/build/src/apis/oauth2');
 const calendar = google.calendar('v3');
 
 const createSession = (req, res) => {
@@ -47,10 +48,6 @@ const createMeetingInvite = (req, res) => {
 
     let { email, name, date, start_time, end_time } = req.body;
     date = date.trim();
-
-
-
-
     const event = {
         eventName: `KALSULTANT | Astro Consultancy | ${name}`,
         description: 'Guiding Your Stars, Illuminating Your Path: Your Astrology Journey Begins Here',
@@ -66,6 +63,7 @@ const createMeetingInvite = (req, res) => {
     )
 
     oauth2Client.setCredentials({
+        access_token: process.env.GOOGLE_ACCESS_TOKEN,
         refresh_token: process.env.GOOGLE_REFRESH_TOKEN
     });
 
@@ -167,17 +165,19 @@ const getBookedSLots = (req, res) => {
 }
 
 const getUserSessions = (req, res) => {
-    const userId=req.query.user_id;
-  
-    pool.query('SELECT * FROM SESSIONS where user_id=$1 ORDER BY CREATED_AT DESC',[userId],(error,results)=>{
-        if(error){
+    const userId = req.query.user_id;
+
+    pool.query('SELECT * FROM SESSIONS where user_id=$1 ORDER BY CREATED_AT DESC', [userId], (error, results) => {
+        if (error) {
             res.status(400).send(error.message);
         }
-        else{
-           res.status(200).send(results.rows);
+        else {
+            res.status(200).send(results.rows);
         }
     })
 }
+
+
 
 
 module.exports = {
@@ -187,6 +187,5 @@ module.exports = {
     getAllSessions,
     updateSessionStatus,
     getBookedSLots,
-    getUserSessions
-
+    getUserSessions,
 }
