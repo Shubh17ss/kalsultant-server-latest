@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KalSultant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            margin: 0;
+            padding: 0;
+            color: white;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #000;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+        }
+
+        .image-container {
+            position: relative;
+            width: 100%;
+            height: 450px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            /* Adjust height as needed */
+            background: linear-gradient(rgba(0, 0, 0, 0.7),
+                    rgba(0, 0, 0, 0.7)), url('cid:sessionImage');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 8px;
+
+        }
+
+        .content {
+            width: 90%;
+            margin: 20px 0;
+            line-height: 1.6;
+            text-align: left;
+            margin-top: 1rem;
+        }
+
+        .content p {
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #2c7dff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="email-container">
+        <div class="image-container">
+            <div class="content">
+                <p>Dear {{name}}, your session is scheduled</p>
+                <p>Date: {{date}}</p>
+                <p>Slot: {{slot}}</p>
+                <p>Session ID: {{sessionId}}</p>
+                <p>Thank you for choosing KalSultant!</p>
+            </div>
+        </div>
+        <div class="footer">
+            © 2025 KalSultant. All rights reserved.
+        </div>
+    </div>
+</body>
+
+</html>

@@ -4,7 +4,7 @@ const pool = require('../Database/connect');
 const getSlots=(req,res)=>{
     const {date}=req.body;
     console.log(date);
-    pool.query('SELECT slot from slots where date=$1',[date],(error,results)=>{
+    pool.query('SELECT slot from slots where date=$1 AND booked is not true order by slot',[date],(error,results)=>{
         if(error){
             res.status(400).send('Internal Server Error');
         }

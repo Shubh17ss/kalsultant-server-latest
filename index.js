@@ -3,39 +3,34 @@ const app = express();
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('path');
-
-const userRoutes = require('./Routes/user');
 const sessionRoutes = require('./Routes/session');
 const slotsRoutes = require('./Routes/slots');
-const adminRoutes = require('./Routes/admin');
-const whatsApproutes=require('./Routes/whatsApproutes');
-const paymentRoutes=require('./Routes/payment');
+const userRoutes = require('./Routes/user');
 
 //for environment variables
 const dotenv = require('dotenv');
 dotenv.config();
 
-app.use(cors());
+app.use(cors({
+  origin:'http://192.168.1.6:3000'
+}));
 app.use(express.json());
 app.use(cookieParser());
 
-app.use('/api/user', userRoutes);
 app.use('/api/session', sessionRoutes);
 app.use('/api/slots', slotsRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/payment',paymentRoutes);
-app.use('/api/whatsApp',whatsApproutes);
+app.use('/api/user', userRoutes);
 
 
 
 //code to render the react build folder
 app.use(express.static(path.join(__dirname, "./build")));
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'build', 'index.html'));
-  });
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
 
 const server = app.listen(process.env.PORT, () => {
-    console.log(`Server started on port ${process.env.PORT}`);
+  console.log(`Server started on port ${process.env.PORT}`);
 })
 
 

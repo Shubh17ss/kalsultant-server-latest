@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkkalsultant=self.webpackChunkkalsultant||[]).push([[144],{9144:function(n,s,t){t.r(s),t.d(s,{default:function(){return l}});t(2791);var e=t(7689),u=t(184),l=function(){var n=(0,e.TH)(),s=null==n.state?null:n.state.sessionId;(0,e.s0)();return console.log("Session Id in checkout js ",s),(0,u.jsx)("div",{children:"Checkout"})}}}]);
-//# sourceMappingURL=144.e2a700c5.chunk.js.map

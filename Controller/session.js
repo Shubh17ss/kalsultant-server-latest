@@ -1,13 +1,14 @@
-const { profileEnd } = require('console');
+const fs = require('fs');
 const pool = require('../Database/connect');
 const { randomUUID } = require('crypto');
 const { google } = require('googleapis');
-const { userInfo } = require('os');
-const { oauth2 } = require('googleapis/build/src/apis/oauth2');
+const { createMeetingInviteUsingSA } = require('../services/scheduleEvent');
+const { sessionCreatedNotifyAdmin, sessionScheduledEmailToUser } = require('../services/EmailServices/sendEmail');
+const { insertTeamDataIntoSheets, insertBookedSessionDataIntoSheets } = require('../services/dataReplicationGS/storeDataInGoogleSheet');
 const calendar = google.calendar('v3');
 
 const createSession = (req, res) => {
-    const data = req.body;
+    let data = req.body;
     const sessionId = randomUUID();
     pool.query('SELECT CURRENT_DATE', (error, results) => {
         if (error) {
@@ -18,21 +19,35 @@ const createSession = (req, res) => {
 
             let creationDate = results.rows[0].current_date;
 
-            pool.query(`INSERT INTO SESSIONS(id,user_id,firstname,lastname,email,dob,tob,gender,city,state,country,session_type,session_date,session_slot,created_at,status,contact_number) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,'Scheduled',$16)`,
-                [sessionId, data.id, data.firstname, data.lastname, data.email, data.dob, data.tob, data.gender, data.city, data.state, data.country, data.session_type, data.session_date, data.session_slot, creationDate, data.contact_number], (error, result) => {
+            pool.query(`INSERT INTO SESSIONS(id,firstname,lastname,email,dob,tob,gender, pob, session_date, session_slot, created_at, status, contact_number) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'unpaid',$12)`,
+                [sessionId, data.firstName, data.lastName, data.email, data.dob, data.tob, data.gender, data.pob, data.date, data.slot, creationDate, data.contactNumber], (error, result) => {
                     if (error) {
                         console.log(error);
                         res.status(400).json({
-                            message: error.message
+                            message: error.message,
+                            code: error.code
                         });
                     }
                     else {
-                        pool.query('UPDATE SLOTS SET booked = true where date=$1 and slot=$2', [data.session_date, data.session_slot], (error, results) => {
+                        pool.query('UPDATE SLOTS SET booked = true where date=$1 and slot=$2', [data.date, data.slot], async (error, results) => {
                             if (error) {
                                 console.log(error.message);
                                 res.status(400).send(error.message);
                             }
                             else {
+                                let obj = {
+                                    name: data.firstName + ' ' + data.lastName,
+                                    email: data.email,
+                                    date: data.date,
+                                    slot: data.slot
+                                };
+
+                                await createMeetingInviteUsingSA(obj);
+                                await sessionCreatedNotifyAdmin(obj);
+                                obj.sessionId = sessionId;
+                                data.sessionId = sessionId;
+                                await sessionScheduledEmailToUser(obj);
+                                await insertBookedSessionDataIntoSheets(data);
                                 res.status(200).json({ success: true, sessionId: sessionId });
                             }
                         })
@@ -43,75 +58,6 @@ const createSession = (req, res) => {
     })
 
 }
-
-const createMeetingInvite = (req, res) => {
-
-    let { email, name, date, start_time, end_time } = req.body;
-    date = date.trim();
-    const event = {
-        eventName: `KALSULTANT | Astro Consultancy | ${name}`,
-        description: 'Guiding Your Stars, Illuminating Your Path: Your Astrology Journey Begins Here',
-        startTime: `${date}T${start_time}`,
-        endTime: `${date}T${end_time}`,
-        timeZone: 'Asia/Kolkata'
-    }
-
-    const oauth2Client = new google.auth.OAuth2(
-        process.env.GOOGLE_CLIENT_ID,
-        process.env.GOOGLE_CLIENT_SECRET,
-        process.env.GOOGLE_REDIRECT_URI,
-    )
-
-    oauth2Client.setCredentials({
-        access_token: process.env.GOOGLE_ACCESS_TOKEN,
-        refresh_token: process.env.GOOGLE_REFRESH_TOKEN
-    });
-
-    calendar.events.insert({
-        auth: oauth2Client,
-        calendarId: 'primary',
-        conferenceDataVersion: 1,
-        sendNotifications: true,
-        resource: {
-            'summary': event.eventName,
-            'description': event.description,
-            'start': {
-                'dateTime': event.startTime,
-                'timeZone': 'Asia/Kolkata'
-            },
-            'end': {
-                'dateTime': event.endTime,
-                'timeZone': 'Asia/Kolkata'
-            },
-            'attendees': [{
-                'email': `${email}`
-            }],
-            'conferenceData': {
-                'createRequest': {
-                    'requestId': 'readnasdf_12dsaf'
-                }
-            }
-        }
-    }).then((response) => {
-        res.status(200).json({ response: response });
-    }).catch((error) => {
-        res.status(400).send(error);
-    })
-
-}
-
-const setMeetingLink = (req, res) => {
-    let { sessionId, url } = req.body;
-    pool.query('UPDATE SESSIONS SET invite_link=$1 where id=$2', [url, sessionId], (error, results) => {
-        if (error) {
-            res.status(400).send('Internal Server Error');
-        }
-        else {
-            res.status(200).json({ message: 'Meeting Url Set' });
-        }
-    })
-}
-
 
 const getAllSessions = (req, res) => {
     const search = req.query.search;
@@ -177,15 +123,39 @@ const getUserSessions = (req, res) => {
     })
 }
 
+const getSessionDetails = (req, res) => {
+    const { sessionId } = req.body;
+    pool.query('SELECT * FROM sessions where id=$1', [sessionId], (error, results) => {
+        if (error) {
+            res.status(400).json({ error: error });
+        } else {
+            res.status(200).json({ data: results.rows })
+        }
+    })
+}
+
+
+// Google linked services
+const storeSessionDataInGoogleSheets = async (req, res) => {
+    const obj = req.body;
+    try {
+        await insertBookedSessionDataIntoSheets(obj);
+        res.status(200).json({ message: 'Data inserted into google sheet' });
+    }
+    catch (error) {
+        console.log(error);
+        res.status(400).json({ error: 'Something went wrong' });
+    }
+}
 
 
 
 module.exports = {
     createSession,
-    createMeetingInvite,
-    setMeetingLink,
     getAllSessions,
     updateSessionStatus,
     getBookedSLots,
     getUserSessions,
+    getSessionDetails,
+    storeSessionDataInGoogleSheets
 }
