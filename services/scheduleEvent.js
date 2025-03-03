@@ -20,7 +20,7 @@ const createMeetingInviteUsingSA = async (obj) => {
     }
     const scopes = ["https://www.googleapis.com/auth/calendar"];
     const calendarId = "kalsultant@gmail.com";
-    const serviceAccount = JSON.parse(fs.readFileSync("./authFiles/sa_kalsultant_google_calendar.json", "utf-8"));
+    const serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
 
     try {
 
