@@ -1,27 +1,20 @@
-import { google } from 'googleapis';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import dotenv from "dotenv";
+const {google} = require('googleapis');
+const serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
+const dotenv=require('dotenv')
+
 dotenv.config();
-
-
-
 const sheets = google.sheets('v4');
-const __fileName = fileURLToPath(import.meta.url);
-const __dirname = dirname(__fileName);
-const SERVICE_ACCOUNT_FILE_PATH = join(__dirname, 'authFiles', 'sa-kalsultant-google-sheets.json');
 const SPREADSHEET_ID = `${process.env.GOOGLE_SHEET_ID}`;
 
 //authenticate using a service account
 async function authenticate() {
     const auth = new google.auth.GoogleAuth({
-        keyFile: SERVICE_ACCOUNT_FILE_PATH,
+        credentials: serviceAccount,
         scopes: ['https://www.googleapis.com/auth/spreadsheets']
     });
     return auth.getClient();
 }
-
-export const insertBookedSessionDataIntoSheets = async (obj) => {
+const insertBookedSessionDataIntoSheets = async (obj) => {
     const { sessionId, email, firstName, lastName, gender, dob, tob, pob, date, slot, contactNumber } = obj;
     let name = firstName + ' ' + lastName;
 
@@ -51,4 +44,7 @@ export const insertBookedSessionDataIntoSheets = async (obj) => {
     catch (err) {
         throw new Error(err);
     }
+}
+module.exports={
+    insertBookedSessionDataIntoSheets
 }
