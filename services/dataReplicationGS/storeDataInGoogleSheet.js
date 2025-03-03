@@ -1,8 +1,8 @@
-const {google} = require('googleapis');
-const serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
-const dotenv=require('dotenv')
+const { google } = require('googleapis');
+const dotenv = require('dotenv')
+dotenv.config({ path: '../../.env' });
 
-dotenv.config();
+const serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
 const sheets = google.sheets('v4');
 const SPREADSHEET_ID = `${process.env.GOOGLE_SHEET_ID}`;
 
@@ -17,10 +17,13 @@ async function authenticate() {
 const insertBookedSessionDataIntoSheets = async (obj) => {
     const { sessionId, email, firstName, lastName, gender, dob, tob, pob, date, slot, contactNumber } = obj;
     let name = firstName + ' ' + lastName;
-
+    console.log("Inserting session data into google sheet");
+    console.log('service account ', serviceAccount);
     try {
         //initialize auth
         const auth = await authenticate();
+        console.log("Authenticated successfully");
+        console.log(auth);
         // Get the last row number
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: SPREADSHEET_ID,
@@ -42,9 +45,11 @@ const insertBookedSessionDataIntoSheets = async (obj) => {
         });
     }
     catch (err) {
+        console.log("We have an error");
+        console.log(err);
         throw new Error(err);
     }
 }
-module.exports={
+module.exports = {
     insertBookedSessionDataIntoSheets
 }

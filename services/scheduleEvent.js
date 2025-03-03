@@ -2,14 +2,14 @@ const fs = require('fs');
 const { google } = require('googleapis');
 
 const createMeetingInviteUsingSA = async (obj) => {
-    start_time='';
-    end_time='';
-    let {name, date, slot } = obj;
-    let hrs=slot.split('-');
-    start_time=hrs[0]+':00',
-    end_time=hrs[1]+':00';
-    let date_arr=date.split('/');
-    date=date_arr[2]+'-'+date_arr[1]+'-'+date_arr[0];
+    start_time = '';
+    end_time = '';
+    let { name, date, slot } = obj;
+    let hrs = slot.split('-');
+    start_time = hrs[0] + ':00',
+        end_time = hrs[1] + ':00';
+    let date_arr = date.split('/');
+    date = date_arr[2] + '-' + date_arr[1] + '-' + date_arr[0];
     date = date.trim();
     const event = {
         eventName: `KALSULTANT | Astro Consultancy | ${name}`,
@@ -32,7 +32,7 @@ const createMeetingInviteUsingSA = async (obj) => {
         );
         await jwtClient.authorize();
         const calendar = google.calendar({ version: "v3", auth: jwtClient });
-        const response =  calendar.events.insert({
+        const response = calendar.events.insert({
             calendarId: calendarId,
             conferenceDataVersion: 1,
             sendNotifications: true,
@@ -61,4 +61,4 @@ const createMeetingInviteUsingSA = async (obj) => {
     }
 }
 
-module.exports={createMeetingInviteUsingSA}
+module.exports = { createMeetingInviteUsingSA }
