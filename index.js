@@ -12,7 +12,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 app.use(cors({
-  origin:'http://192.168.1.6:3000'
+  // origin:['http://192.168.1.6:3000','http://localhost:3000']
 }));
 app.use(express.json());
 app.use(cookieParser());

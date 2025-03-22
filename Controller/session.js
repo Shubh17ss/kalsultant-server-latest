@@ -3,7 +3,7 @@ const pool = require('../Database/connect');
 const { randomUUID } = require('crypto');
 const { google } = require('googleapis');
 const { createMeetingInviteUsingSA } = require('../services/scheduleEvent');
-const { sessionCreatedNotifyAdmin, sessionScheduledEmailToUser } = require('../services/EmailServices/sendEmail');
+const { sessionCreatedNotifyAdmin, sessionScheduledEmailToUser, sendEmailNotificationOnProposedSlot } = require('../services/EmailServices/sendEmail');
 const { insertTeamDataIntoSheets, insertBookedSessionDataIntoSheets } = require('../services/dataReplicationGS/storeDataInGoogleSheet');
 const calendar = google.calendar('v3');
 
@@ -134,6 +134,58 @@ const getSessionDetails = (req, res) => {
     })
 }
 
+const storeProposedSession = (req, res) => {
+    try {
+        let data = req.body;
+        const sessionId = randomUUID();
+        pool.query('SELECT CURRENT_DATE', (error, results) => {
+            if (error) {
+                console.log(error.message);
+                res.status(400).send(error.message);
+            }
+            else {
+                let creationDate = results.rows[0].current_date;
+                pool.query(`INSERT INTO SESSIONS(id,firstname,lastname,email,dob,tob,gender, pob, session_date, session_slot,proposed_slot, created_at, status, contact_number) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'unpaid',$13)`,
+                    [sessionId, data.firstName, data.lastName, data.email, data.dob, data.tob, data.gender, data.pob, data.date, data.slot, data.proposed_slot, creationDate, data.contactNumber], (error, result) => {
+                        if (error) {
+                            console.log(error);
+                            res.status(400).json({
+                                message: error.message,
+                                code: error.code
+                            });
+                        }
+                        else {
+                            pool.query('UPDATE SLOTS SET booked = true where date=$1 and slot=$2', [data.date, data.slot], async (error, results) => {
+                                if (error) {
+                                    console.log(error.message);
+                                    res.status(400).send(error.message);
+                                }
+                                else {
+                                    let obj = {
+                                        name: data.firstName + ' ' + data.lastName,
+                                        email: data.email,
+                                        date: data.date,
+                                        slot: data.proposed_slot
+                                    };
+
+                                    obj.sessionId = sessionId;
+                                    data.sessionId = sessionId;
+                                    await sendEmailNotificationOnProposedSlot(obj);
+                                    await insertBookedSessionDataIntoSheets(data);
+                                    res.status(200).json({ success: true, sessionId: sessionId });
+                                }
+                            })
+                        }
+                    })
+
+            }
+        })
+
+    } catch (error) {
+        res.status(400).json({ error: error.message })
+    }
+}
+
 
 // Google linked services
 const storeSessionDataInGoogleSheets = async (req, res) => {
@@ -157,5 +209,6 @@ module.exports = {
     getBookedSLots,
     getUserSessions,
     getSessionDetails,
-    storeSessionDataInGoogleSheets
+    storeSessionDataInGoogleSheets,
+    storeProposedSession
 }

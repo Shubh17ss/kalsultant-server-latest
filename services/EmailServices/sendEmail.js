@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
+const { send } = require('process');
 
 const sessionCreatedNotifyAdmin = (obj) => {
     let { name, email, date, slot } = obj;
@@ -102,8 +103,36 @@ const sendUserQueryToAdmin = (obj) => {
     return;
 }
 
+const sendEmailNotificationOnProposedSlot = (obj) => {
+    let { name, email, date, slot } = obj;
+    let authData = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        secure: true,
+        port: 465,
+        debug: true,
+        auth: {
+            user: process.env.KALSULTANT_EMAIL,
+            pass: process.env.KALSULTANT_PASSWORD,
+        },
+    })
+    let message = `Hi ${name}, you have requested for a custom slot with us.\nWe hope to get back with positive response. \nDetails: Date : ${date} Slot: ${slot}.\n\n Regards,\n Team KalSultant`
+    authData.sendMail({
+        from: `kalsultant@gmail.com`,
+        to: email,
+        cc: 'shubhsteam1701@gmail.com',
+        subject: `Thank you ${name} for choosing Kalsultant`,
+        text: message
+    }).then((response) => {
+        console.log(response);
+    }).catch((error) => {
+        console.log(error);
+    })
+    return;
+}
+
 module.exports = {
     sessionCreatedNotifyAdmin,
     sessionScheduledEmailToUser,
-    sendUserQueryToAdmin
+    sendUserQueryToAdmin,
+    sendEmailNotificationOnProposedSlot
 }
