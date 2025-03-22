@@ -18,7 +18,7 @@ const sessionCreatedNotifyAdmin = (obj) => {
     let message = `Please go to calendar for kalsultant.com and add the user's email id to attendees. Scheduled Date:${date} Slot:${slot}`
     authData.sendMail({
         from: `kalsultant@gmail.com`,
-        to: ['shubhsteam1701@gmail.com'],
+        to: ['shubhsteam1701@gmail.com','kartiksharma13571@gmail.com'],
         subject: `${name} with email id: ${email} has scheduled a session.`,
         text: message
     }).then((response) => {
@@ -119,7 +119,7 @@ const sendEmailNotificationOnProposedSlot = (obj) => {
     authData.sendMail({
         from: `kalsultant@gmail.com`,
         to: email,
-        cc: 'shubhsteam1701@gmail.com',
+        cc: ['shubhsteam1701@gmail.com','kartiksharma13571@gmail.com'],
         subject: `Thank you ${name} for choosing Kalsultant`,
         text: message
     }).then((response) => {
