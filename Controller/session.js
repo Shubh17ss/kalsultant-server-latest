@@ -1,61 +1,83 @@
 const fs = require('fs');
+const Session = require('../models/session');
 const pool = require('../Database/connect');
 const { randomUUID } = require('crypto');
 const { google } = require('googleapis');
 const { createMeetingInviteUsingSA } = require('../services/scheduleEvent');
 const { sessionCreatedNotifyAdmin, sessionScheduledEmailToUser, sendEmailNotificationOnProposedSlot } = require('../services/EmailServices/sendEmail');
-const { insertTeamDataIntoSheets, insertBookedSessionDataIntoSheets } = require('../services/dataReplicationGS/storeDataInGoogleSheet');
-const calendar = google.calendar('v3');
+const { insertBookedSessionDataIntoSheets } = require('../services/dataReplicationGS/storeDataInGoogleSheet');
 
-const createSession = (req, res) => {
-    let data = req.body;
-    const sessionId = randomUUID();
-    pool.query('SELECT CURRENT_DATE', (error, results) => {
-        if (error) {
-            console.log(error.message);
-            res.status(400).send(error.message);
+const createSession = async (req, res) => {
+    try {
+        let { firstName, lastName, email, dob, tob, gender, pob, date, slot, contactNumber } = req.body;
+        let name = firstName + " " + lastName;
+        const session_date = date;
+        const sessionAlreadyBooked = await Session.findOne({
+            session_date: session_date,
+            slot: slot
+        });
+        if (sessionAlreadyBooked) {
+            res.status(400).json({Message: "Sorry sesion already booked"});
+            return;
         }
-        else {
+        
+        const session = new Session({
+            name, email, contactNumber, dob, tob, pob, gender, session_date, slot
+        });
+        const saved_session = await session.save();
+        return res.status(200).json({ message: "Session saved successfully in mongoDB", data: saved_session });
+    }
+    catch (error) {
+        return res.status(400).json(error);
+    }
 
-            let creationDate = results.rows[0].current_date;
+    // SQL CODE BELOW
+    // pool.query('SELECT CURRENT_DATE', (error, results) => {
+    //     if (error) {
+    //         console.log(error.message);
+    //         res.status(400).send(error.message);
+    //     }
+    //     else {
 
-            pool.query(`INSERT INTO SESSIONS(id,firstname,lastname,email,dob,tob,gender, pob, session_date, session_slot, created_at, status, contact_number) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'unpaid',$12)`,
-                [sessionId, data.firstName, data.lastName, data.email, data.dob, data.tob, data.gender, data.pob, data.date, data.slot, creationDate, data.contactNumber], (error, result) => {
-                    if (error) {
-                        console.log(error);
-                        res.status(400).json({
-                            message: error.message,
-                            code: error.code
-                        });
-                    }
-                    else {
-                        pool.query('UPDATE SLOTS SET booked = true where date=$1 and slot=$2', [data.date, data.slot], async (error, results) => {
-                            if (error) {
-                                console.log(error.message);
-                                res.status(400).send(error.message);
-                            }
-                            else {
-                                let obj = {
-                                    name: data.firstName + ' ' + data.lastName,
-                                    email: data.email,
-                                    date: data.date,
-                                    slot: data.slot
-                                };
+    //         let creationDate = results.rows[0].current_date;
 
-                                await createMeetingInviteUsingSA(obj);
-                                await sessionCreatedNotifyAdmin(obj);
-                                obj.sessionId = sessionId;
-                                data.sessionId = sessionId;
-                                await sessionScheduledEmailToUser(obj);
-                                await insertBookedSessionDataIntoSheets(data);
-                                res.status(200).json({ success: true, sessionId: sessionId });
-                            }
-                        })
-                    }
-                })
+    //         pool.query(`INSERT INTO SESSIONS(id,firstname,lastname,email,dob,tob,gender, pob, session_date, session_slot, created_at, status, contact_number) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'unpaid',$12)`,
+    //             [sessionId, data.firstName, data.lastName, data.email, data.dob, data.tob, data.gender, data.pob, data.date, data.slot, creationDate, data.contactNumber], (error, result) => {
+    //                 if (error) {
+    //                     console.log(error);
+    //                     res.status(400).json({
+    //                         message: error.message,
+    //                         code: error.code
+    //                     });
+    //                 }
+    //                 else {
+    //                     pool.query('UPDATE SLOTS SET booked = true where date=$1 and slot=$2', [data.date, data.slot], async (error, results) => {
+    //                         if (error) {
+    //                             console.log(error.message);
+    //                             res.status(400).send(error.message);
+    //                         }
+    //                         else {
+    //                             let obj = {
+    //                                 name: data.firstName + ' ' + data.lastName,
+    //                                 email: data.email,
+    //                                 date: data.date,
+    //                                 slot: data.slot
+    //                             };
 
-        }
-    })
+    //                             await createMeetingInviteUsingSA(obj);
+    //                             await sessionCreatedNotifyAdmin(obj);
+    //                             obj.sessionId = sessionId;
+    //                             data.sessionId = sessionId;
+    //                             await sessionScheduledEmailToUser(obj);
+    //                             await insertBookedSessionDataIntoSheets(data);
+    //                             res.status(200).json({ success: true, sessionId: sessionId });
+    //                         }
+    //                     })
+    //                 }
+    //         })
+
+    //     }
+    // })
 
 }
 
