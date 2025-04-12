@@ -5,11 +5,12 @@ const adminController = require('../Controller/admin');
 
 router.post('/createSession', controller.createSession);
 router.post('/storeProposedSession', controller.storeProposedSession)
-router.get('/getUserSessions', controller.getUserSessions);
+router.get('/getUserSessions', controller.getUserSessions); 
 router.post('/getBookedSlots', controller.getBookedSLots);
-router.post('/getAllSessions', adminController.validateJWT, controller.getAllSessions);
-router.put('/updateSessionStatus', adminController.validateJWT, controller.updateSessionStatus);
+router.post('/getAllSessions', controller.getAllSessions);
+router.put('/updateSessionStatus', controller.updateSessionStatus);
 router.post('/storeSessionDataInGoogleSheets', controller.storeSessionDataInGoogleSheets)
+
 //get sessions
 router.post('/getSession', controller.getSessionDetails);
 

@@ -7,9 +7,10 @@ const { createMeetingInviteUsingSA } = require('../services/scheduleEvent');
 const { sessionCreatedNotifyAdmin, sessionScheduledEmailToUser, sendEmailNotificationOnProposedSlot } = require('../services/EmailServices/sendEmail');
 const { insertBookedSessionDataIntoSheets } = require('../services/dataReplicationGS/storeDataInGoogleSheet');
 
+//SESSION POST METHODS
 const createSession = async (req, res) => {
     try {
-        let { firstName, lastName, email, dob, tob, gender, pob, date, slot, contactNumber } = req.body;
+        let { firstName, lastName, email, dob, tob, gender, pob, date, slot, proposedSlot, contactNumber } = req.body;
         let name = firstName + " " + lastName;
         const session_date = date;
         const sessionAlreadyBooked = await Session.findOne({
@@ -17,18 +18,29 @@ const createSession = async (req, res) => {
             slot: slot
         });
         if (sessionAlreadyBooked) {
-            res.status(400).json({Message: "Sorry sesion already booked"});
+            res.status(400).json({ Message: "Sorry sesion already booked" });
             return;
         }
-        
+
         const session = new Session({
-            name, email, contactNumber, dob, tob, pob, gender, session_date, slot
+            name, email, contactNumber, dob, tob, pob, gender, session_date, slot, proposedSlot
         });
         const saved_session = await session.save();
-        return res.status(200).json({ message: "Session saved successfully in mongoDB", data: saved_session });
+        res.status(200).json({ message: "Session saved successfully in mongoDB", data: saved_session });
+        let obj = {
+            sessionId: saved_session._id,
+            name: name,
+            email: email,
+            date: session_date,
+            slot: proposedSlot
+        };
+        await sendEmailNotificationOnProposedSlot(obj);
+        await insertBookedSessionDataIntoSheets(saved_session);
+        return;
     }
     catch (error) {
-        return res.status(400).json(error);
+        console.log(error)
+        return res.status(400).json({ error: error.message });
     }
 
     // SQL CODE BELOW
@@ -80,46 +92,93 @@ const createSession = async (req, res) => {
     // })
 
 }
+const storeProposedSession = async (req, res) => {
+    try {
+        let { firstName, lastName, email, dob, tob, gender, pob, date, slot, proposedSlot, contactNumber } = req.body;
+        let name = firstName + ' ' + lastName;
+        const session_date = date;
+        const sessionAlreadyProposed = await Session.findOne({
+            session_date: session_date,
+            proposedSlot: proposedSlot
+        });
+        if (sessionAlreadyProposed) {
+            return res.status(400).json({ message: "Slot already proposed by someone else" });
+        }
+        const session = new Session({
+            name, email, contactNumber, dob, tob, pob, gender, session_date, slot, proposedSlot
+        });
+        const saved_session = await session.save();
+        res.status(200).json({ message: "Session saved succesfully", data: saved_session });
+        let obj = {
+            sessionId: saved_session._id,
+            name: name,
+            email: email,
+            date: session_date,
+            slot: proposedSlot
+        };
+        await sendEmailNotificationOnProposedSlot(obj);
+        await insertBookedSessionDataIntoSheets(saved_session);
+        return;
 
-const getAllSessions = (req, res) => {
-    const search = req.query.search;
-    if (search.length == 0) {
-        pool.query('select * from sessions ORDER BY created_at DESC', (error, results) => {
-            if (error) {
-                res.status(400).json({ message: 'Internal Server Error' });
-            }
-            else {
-                res.status(200).json({ result: results.rows });
-            }
-        })
+    } catch (error) {
+        res.status(400).json({ error: error.message })
     }
-    else {
-        pool.query('SELECT * FROM SESSIONS WHERE firstname ~* $1 OR lastname ~* $1 OR email ~* $1  OR session_date ~* $1 order by created_at DESC;', [search], (error, results) => {
-            if (error) {
-                res.status(400).send('Internal Server Error');
+}
+//SESSION GET METHODS
+const getAllSessions = async (req, res) => {
+    try {
+        let sessions = await Session.find();
+        res.status(200).json({ data: sessions });
+    }
+    catch (error) {
+        console.log(error);
+        res.status(400).json({ error: error.message })
+    }
+}
+const getUserSessions = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const sessions = await Session.find({
+            email: email
+        });
+        res.status(200).json({ data: sessions })
+    }
+    catch (error) {
+        res.status(400).json({ error: error.message })
+    }
+}
+// BELOW IS GET SESSION BY ID
+const getSessionDetails = async (req, res) => {
+    const { sessionId } = req.body;
+    try {
+        const sessionData = await Session.findById({ _id: sessionId });
+        res.status(200).json({ data: sessionData });
+    }
+    catch (error) {
+        res.status(400).json({ error: error.message })
+    }
+}
+//SESSION UPDATE METHODS
+const updateSessionStatus = async (req, res) => {
+    try {
+        const { sessionId, status } = req.body;
+        const session = await Session.updateOne(
+            { _id: sessionId },
+            {
+                $set: { status: status }
             }
-            else {
-
-                res.status(200).json({ result: results.rows })
-            }
-        })
+        );
+        res.status(200).json({ message: "Record updated successfully", data: session })
+    }
+    catch (error) {
+        res.status(400).json({ error: error.message });
     }
 }
 
-const updateSessionStatus = (req, res) => {
-    let { id, status } = req.body;
-    pool.query('UPDATE SESSIONS SET STATUS = $1 where id=$2 ', [status, id], (error, results) => {
-        if (error) {
-            res.status(400).send('Internal Server Error');
-        }
-        else {
-            res.status(200).json({ message: 'Status Updated Successfully' });
-        }
-    })
-}
+
+// ------------------------*********************----------------------------------
 
 //api to get booked slots for a given date
-
 const getBookedSLots = (req, res) => {
     const date = req.body.date;
     pool.query('SELECT slot from slots where date=$1 AND booked is null', [date], (error, results) => {
@@ -131,83 +190,6 @@ const getBookedSLots = (req, res) => {
         }
     })
 }
-
-const getUserSessions = (req, res) => {
-    const userId = req.query.user_id;
-
-    pool.query('SELECT * FROM SESSIONS where user_id=$1 ORDER BY CREATED_AT DESC', [userId], (error, results) => {
-        if (error) {
-            res.status(400).send(error.message);
-        }
-        else {
-            res.status(200).send(results.rows);
-        }
-    })
-}
-
-const getSessionDetails = (req, res) => {
-    const { sessionId } = req.body;
-    pool.query('SELECT * FROM sessions where id=$1', [sessionId], (error, results) => {
-        if (error) {
-            res.status(400).json({ error: error });
-        } else {
-            res.status(200).json({ data: results.rows })
-        }
-    })
-}
-
-const storeProposedSession = (req, res) => {
-    try {
-        let data = req.body;
-        const sessionId = randomUUID();
-        pool.query('SELECT CURRENT_DATE', (error, results) => {
-            if (error) {
-                console.log(error.message);
-                res.status(400).send(error.message);
-            }
-            else {
-                let creationDate = results.rows[0].current_date;
-                pool.query(`INSERT INTO SESSIONS(id,firstname,lastname,email,dob,tob,gender, pob, session_date, session_slot,proposed_slot, created_at, status, contact_number) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'unpaid',$13)`,
-                    [sessionId, data.firstName, data.lastName, data.email, data.dob, data.tob, data.gender, data.pob, data.date, data.slot, data.proposed_slot, creationDate, data.contactNumber], (error, result) => {
-                        if (error) {
-                            console.log(error);
-                            res.status(400).json({
-                                message: error.message,
-                                code: error.code
-                            });
-                        }
-                        else {
-                            pool.query('UPDATE SLOTS SET booked = true where date=$1 and slot=$2', [data.date, data.slot], async (error, results) => {
-                                if (error) {
-                                    console.log(error.message);
-                                    res.status(400).send(error.message);
-                                }
-                                else {
-                                    let obj = {
-                                        name: data.firstName + ' ' + data.lastName,
-                                        email: data.email,
-                                        date: data.date,
-                                        slot: data.proposed_slot
-                                    };
-
-                                    obj.sessionId = sessionId;
-                                    data.sessionId = sessionId;
-                                    await sendEmailNotificationOnProposedSlot(obj);
-                                    await insertBookedSessionDataIntoSheets(data);
-                                    res.status(200).json({ success: true, sessionId: sessionId });
-                                }
-                            })
-                        }
-                    })
-
-            }
-        })
-
-    } catch (error) {
-        res.status(400).json({ error: error.message })
-    }
-}
-
 
 // Google linked services
 const storeSessionDataInGoogleSheets = async (req, res) => {
@@ -221,8 +203,6 @@ const storeSessionDataInGoogleSheets = async (req, res) => {
         res.status(400).json({ error: 'Something went wrong' });
     }
 }
-
-
 
 module.exports = {
     createSession,

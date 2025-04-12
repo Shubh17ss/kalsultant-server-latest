@@ -15,8 +15,8 @@ async function authenticate() {
     return auth.getClient();
 }
 const insertBookedSessionDataIntoSheets = async (obj) => {
-    const { sessionId, email, firstName, lastName, gender, dob, tob, pob, date, slot, proposed_slot, contactNumber } = obj;
-    let name = firstName + ' ' + lastName;
+    const { _id, email, name, gender, dob, tob, pob, session_date, slot, proposedSlot, contactNumber, status } = obj;
+    const sessionId = _id;
     console.log("Inserting session data into google sheet");
     console.log('service account ', serviceAccount);
     try {
@@ -32,7 +32,7 @@ const insertBookedSessionDataIntoSheets = async (obj) => {
         });
         const numRows = response.data.values ? response.data.values.length : 0;
         // Define the new data to insert
-        const sessionData = [[sessionId, email, contactNumber, name, gender, dob, tob, pob, date, slot, proposed_slot, "Unpaid", "", "Scheduled"]];
+        const sessionData = [[sessionId, email, contactNumber, name, gender, dob, tob, pob, session_date, slot, proposedSlot, status, "", "Scheduled"]];
         // Insert the data into the next available row
         await sheets.spreadsheets.values.update({
             spreadsheetId: SPREADSHEET_ID,
