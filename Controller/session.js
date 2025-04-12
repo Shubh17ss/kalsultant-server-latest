@@ -6,6 +6,7 @@ const { google } = require('googleapis');
 const { createMeetingInviteUsingSA } = require('../services/scheduleEvent');
 const { sessionCreatedNotifyAdmin, sessionScheduledEmailToUser, sendEmailNotificationOnProposedSlot } = require('../services/EmailServices/sendEmail');
 const { insertBookedSessionDataIntoSheets } = require('../services/dataReplicationGS/storeDataInGoogleSheet');
+const Slots = require('../models/slots');
 
 //SESSION POST METHODS
 const createSession = async (req, res) => {
@@ -18,7 +19,7 @@ const createSession = async (req, res) => {
             slot: slot
         });
         if (sessionAlreadyBooked) {
-            res.status(400).json({ Message: "Sorry sesion already booked" });
+            res.status(400).json({ Message: "Sorry session already booked" });
             return;
         }
 
@@ -26,7 +27,13 @@ const createSession = async (req, res) => {
             name, email, contactNumber, dob, tob, pob, gender, session_date, slot, proposedSlot
         });
         const saved_session = await session.save();
+        await Slots.updateOne(
+            { date: session_date, slot: slot },
+            { $set: { booked: true } }
+        );
         res.status(200).json({ message: "Session saved successfully in mongoDB", data: saved_session });
+        
+        //services functions
         let obj = {
             sessionId: saved_session._id,
             name: name,
@@ -102,7 +109,7 @@ const storeProposedSession = async (req, res) => {
             proposedSlot: proposedSlot
         });
         if (sessionAlreadyProposed) {
-            return res.status(400).json({ message: "Slot already proposed by someone else" });
+            return res.status(400).json({ message: "Slot already proposed by someone" });
         }
         const session = new Session({
             name, email, contactNumber, dob, tob, pob, gender, session_date, slot, proposedSlot
@@ -174,8 +181,6 @@ const updateSessionStatus = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 }
-
-
 // ------------------------*********************----------------------------------
 
 //api to get booked slots for a given date
@@ -190,7 +195,6 @@ const getBookedSLots = (req, res) => {
         }
     })
 }
-
 // Google linked services
 const storeSessionDataInGoogleSheets = async (req, res) => {
     const obj = req.body;
@@ -203,7 +207,6 @@ const storeSessionDataInGoogleSheets = async (req, res) => {
         res.status(400).json({ error: 'Something went wrong' });
     }
 }
-
 module.exports = {
     createSession,
     getAllSessions,

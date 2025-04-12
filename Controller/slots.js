@@ -1,46 +1,50 @@
 const pool = require('../Database/connect');
+const Slots = require('../models/slots');
+const Sessions = require('../models/session');
 
-
-const getSlots = (req, res) => {
+//to be used with proposed slot api
+const getSlots = async (req, res) => {
     const { date } = req.body;
-    pool.query('SELECT count(id) from sessions where session_date=$1 AND (session_slot is NOT NULL OR proposed_slot is NOT NULL) ', [date], (error, result) => {
-        if (error) {
-            res.status(400).json({ error: 'Internal server error' });
+    try {
+        const count = await Sessions.countDocuments({ session_date: date });
+        if (count === 6) {
+            res.status(400).json({ message: 'Maximum capacity of 6 slots reached for the day' });
             return;
         }
-        else {
-            // reached maximum handling capacity for the day
-            let count = result.rows[0].count;
-            if (Number(count) === 6) {
-                res.status(300).json({ message: 'Maximum capacity of 6 slots reached for the day' });
-                return;
-            }
-            else {
-                pool.query('SELECT slot from slots where date=$1 AND booked is not true order by slot', [date], (error, results) => {
-                    if (error) {
-                        res.status(400).send('Internal Server Error');
-                    }
-                    else {
-                        res.status(200).json({ results: results.rows });
-                    }
-                })
-            }
-
+        const availableSlots = await Slots.find({ date: date, booked: false });
+        res.status(200).json({ data: availableSlots });
+        return;
+    }
+    catch (error) {
+        res.status(400).json({ error: error });
+        return;
+    }
+}
+const addSlot = async (req, res) => {
+    try {
+        const { date, slot } = req.body;
+        const slotAlreadyCreated = await Slots.find({
+            $and: [
+                { date: date },
+                { slot: slot }
+            ]
+        });
+        if (slotAlreadyCreated.length!=0) {
+            res.status(300).json({ message: "Slot already created" });
+            return;
         }
-    })
+        const slotMd = new Slots({
+            date, slot
+        });
+        const savedSlot = await slotMd.save();
+        res.status(200).json({ message: 'Slot created successfully', data: savedSlot });
+    }
+    catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+    return;
 }
 
-const addSlot = (req, res) => {
-    const { date, slot } = req.body;
-    pool.query('INSERT INTO SLOTS(DATE, SLOT) VALUES($1,$2)', [date, slot], (error, results) => {
-        if (error) {
-            res.status(400).send('Internal Server Error');
-        }
-        else {
-            res.status(200).json({ message: 'Slot created Successfully' });
-        }
-    })
-}
 module.exports = {
     getSlots,
     addSlot,
