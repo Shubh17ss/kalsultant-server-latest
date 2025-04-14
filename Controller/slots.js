@@ -1,4 +1,3 @@
-const pool = require('../Database/connect');
 const Slots = require('../models/slots');
 const Sessions = require('../models/session');
 

@@ -1,7 +1,6 @@
 const { Router } = require('express');
 const router = Router();
 const controller = require('../Controller/session');
-const adminController = require('../Controller/admin');
 
 router.post('/createSession', controller.createSession);
 router.post('/storeProposedSession', controller.storeProposedSession)

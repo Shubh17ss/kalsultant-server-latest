@@ -19,7 +19,7 @@ const connectDB = async () => {
         authSource: 'admin',             // Authentication database (optional for Atlas)
     };  
     try {
-        const conn = await mongoose.connect('mongodb+srv://kalsultant:Xi3kWqX8yyvpo7cv@clusteritraa1.pxvg0.mongodb.net/kalsultant_db',options)
+        const conn = await mongoose.connect(process.env.MONGO_DB_URL,options)
         return true;
     }
     catch (error) {

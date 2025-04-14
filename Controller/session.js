@@ -1,6 +1,5 @@
 const fs = require('fs');
 const Session = require('../models/session');
-const pool = require('../Database/connect');
 const { randomUUID } = require('crypto');
 const { google } = require('googleapis');
 const { createMeetingInviteUsingSA } = require('../services/scheduleEvent');
@@ -49,55 +48,6 @@ const createSession = async (req, res) => {
         console.log(error)
         return res.status(400).json({ error: error.message });
     }
-
-    // SQL CODE BELOW
-    // pool.query('SELECT CURRENT_DATE', (error, results) => {
-    //     if (error) {
-    //         console.log(error.message);
-    //         res.status(400).send(error.message);
-    //     }
-    //     else {
-
-    //         let creationDate = results.rows[0].current_date;
-
-    //         pool.query(`INSERT INTO SESSIONS(id,firstname,lastname,email,dob,tob,gender, pob, session_date, session_slot, created_at, status, contact_number) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'unpaid',$12)`,
-    //             [sessionId, data.firstName, data.lastName, data.email, data.dob, data.tob, data.gender, data.pob, data.date, data.slot, creationDate, data.contactNumber], (error, result) => {
-    //                 if (error) {
-    //                     console.log(error);
-    //                     res.status(400).json({
-    //                         message: error.message,
-    //                         code: error.code
-    //                     });
-    //                 }
-    //                 else {
-    //                     pool.query('UPDATE SLOTS SET booked = true where date=$1 and slot=$2', [data.date, data.slot], async (error, results) => {
-    //                         if (error) {
-    //                             console.log(error.message);
-    //                             res.status(400).send(error.message);
-    //                         }
-    //                         else {
-    //                             let obj = {
-    //                                 name: data.firstName + ' ' + data.lastName,
-    //                                 email: data.email,
-    //                                 date: data.date,
-    //                                 slot: data.slot
-    //                             };
-
-    //                             await createMeetingInviteUsingSA(obj);
-    //                             await sessionCreatedNotifyAdmin(obj);
-    //                             obj.sessionId = sessionId;
-    //                             data.sessionId = sessionId;
-    //                             await sessionScheduledEmailToUser(obj);
-    //                             await insertBookedSessionDataIntoSheets(data);
-    //                             res.status(200).json({ success: true, sessionId: sessionId });
-    //                         }
-    //                     })
-    //                 }
-    //         })
-
-    //     }
-    // })
-
 }
 const storeProposedSession = async (req, res) => {
     try {
@@ -186,14 +136,8 @@ const updateSessionStatus = async (req, res) => {
 //api to get booked slots for a given date
 const getBookedSLots = (req, res) => {
     const date = req.body.date;
-    pool.query('SELECT slot from slots where date=$1 AND booked is null', [date], (error, results) => {
-        if (error) {
-            res.status(400).send('Internal Server Error');
-        }
-        else {
-            res.status(200).json({ slots: results.rows });
-        }
-    })
+    res.status(200).json({message:'This controller is not build yet'});
+    return;
 }
 // Google linked services
 const storeSessionDataInGoogleSheets = async (req, res) => {

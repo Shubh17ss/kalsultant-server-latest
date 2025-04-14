@@ -1,5 +1,4 @@
 const { sendUserQueryToAdmin } = require("../services/EmailServices/sendEmail");
-const pool = require('../Database/connect');
 const Reviews = require('../models/review');
 
 const recordUserQuery = (req, res) => {
