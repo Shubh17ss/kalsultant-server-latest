@@ -22,14 +22,6 @@ app.use('/api/session', sessionRoutes);
 app.use('/api/slots', slotsRoutes);
 app.use('/api/user', userRoutes);
 
-
-
-//code to render the react build folder
-app.use(express.static(path.join(__dirname, "./build")));
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
-
 const server = app.listen(process.env.PORT, async () => {
   try {
     const connection=await connectDb();
