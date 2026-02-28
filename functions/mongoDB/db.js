@@ -1,0 +1,38 @@
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+const {config}=require('firebase-functions/v2');
+
+dotenv.config();
+
+
+
+const connectDB = async () => {
+    if(mongoose.connection.readyState === 1){
+        //already connected;
+        return true;
+    }
+    const options = {
+        useNewUrlParser: true,           // Use new URL parser (removes deprecation warning)
+        useUnifiedTopology: true,        // Use new server discovery and monitoring engine
+        connectTimeoutMS: 10000,         // Time to wait before connection timeout (in ms)
+        socketTimeoutMS: 45000,          // Time to wait before socket timeout (in ms)
+        serverSelectionTimeoutMS: 5000,  // Time to wait for server selection (in ms)
+        autoIndex: false,                // Disable auto-creation of indexes in production for performance
+        maxPoolSize: 10,                 // Maximum number of socket connections in the pool
+        minPoolSize: 5,                  // Minimum number of socket connections in the pool
+        retryWrites: true,               // Retry write operations on transient network errors
+        w: 'majority',                   // Write acknowledgment (ensure write is committed to majority of nodes)
+        tls: true,                       // Enable TLS/SSL connection if using MongoDB Atlas or secured connection
+        authSource: 'admin',             // Authentication database (optional for Atlas)
+    };  
+    try {
+        const conn = await mongoose.connect(process.env.MONGO_DB_URL,options);
+        return true;
+    }
+    catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+
+module.exports = connectDB
