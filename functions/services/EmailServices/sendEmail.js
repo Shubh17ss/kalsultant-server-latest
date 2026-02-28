@@ -131,6 +131,7 @@ const sendEmailNotificationOnProposedSlot = (obj) => {
     return;
 }
 
+
 module.exports = {
     sessionCreatedNotifyAdmin,
     sessionScheduledEmailToUser,

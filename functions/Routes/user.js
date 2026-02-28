@@ -5,5 +5,6 @@ const controller = require('../Controller/user');
 router.post('/userContactUsForm', controller.recordUserQuery);
 router.post('/storeReview',controller.storeReview);
 router.get('/reviews', controller.getUsersReviews);
+router.post('/recordUserQueryEmail', controller.insertUserQueryEmailIntoSheets);
 
 module.exports = router;
